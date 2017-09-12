@@ -41,6 +41,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected LocationListener locationListener;
     private GoogleMap mMap;
     boolean firstTime = true;
+    int mapZoom = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,10 +138,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 // Add the request to the RequestQueue.
         queue.add(stringRequest);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(e.getLatitude(), e.getLongitude()), 10));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(e.getLatitude(), e.getLongitude()), mapZoom));
         if(firstTime) {
+            mapZoom += 5;
             mMap.animateCamera(CameraUpdateFactory.zoomIn());
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 3000, null);
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(mapZoom), 3000, null);
             firstTime = false;
         }
     }
