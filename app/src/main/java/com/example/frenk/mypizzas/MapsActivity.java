@@ -139,6 +139,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 // Add the request to the RequestQueue.
         queue.add(stringRequest);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(e.getLatitude(), e.getLongitude()), mapZoom));
+        //mMap.animateCamera(CameraUpdateFactory.zoomIn());
         if(firstTime) {
             mapZoom += 5;
             mMap.animateCamera(CameraUpdateFactory.zoomIn());
