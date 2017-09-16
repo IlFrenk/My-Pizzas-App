@@ -2,23 +2,25 @@ package com.example.frenk.mypizzas;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.net.Uri;
 import android.os.Debug;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -29,19 +31,17 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 
 import java.io.Console;
 
-import static android.location.LocationProvider.AVAILABLE;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
     protected LocationManager locationManager;
-    protected LocationListener locationListener;
+    //protected LocationListener myPosition;
     private GoogleMap mMap;
     boolean firstTime = true;
-    int mapZoom = 10;
+    float mapZoom = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +80,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        //mMap.setOnInfoWindowClickListener(this);
     }
+
 
     @Override
     public void onLocationChanged(Location location) {
@@ -95,10 +97,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             return;
         }
-        changeCamera(location);
+        Marker myPos = mMap.addMarker(new MarkerOptions()
+            .position(new LatLng(location.getLatitude(), location.getLongitude()))
+            .title("La tua posizione")
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.down_finger)));
+        myPos.showInfoWindow();
+        findPizzerias(location);
     }
 
-    void changeCamera(Location e){
+    void findPizzerias(final Location e){
         RequestQueue queue = Volley.newRequestQueue(this);
         String url ="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+ e.getLatitude() +","+e.getLongitude()+"&radius=500&type=restaurant&keyword=pizza&key=AIzaSyAf_F1XcHp_zJYCR_jDHYnGhEi0ATQiCpI\n";
 
@@ -118,13 +125,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 Double lat = location.getDouble("lat");
                                 Double lng = location.getDouble("lng");
                                 //Log.d(jsO.getString("name"),String.valueOf(lat));
-                                LatLng currPoint = new LatLng(lat, lng);
-                                Marker pos = mMap.addMarker(new MarkerOptions()
+                                final LatLng currPoint = new LatLng(lat, lng);
+                                mMap.addMarker(new MarkerOptions()
                                         .position(currPoint)
                                         .title(jsO.getString("name"))
                                         .snippet("Get Directions")
                                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.pizza)));
-                                //pos.showInfoWindow();
+
+
+                                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+                                    @Override
+                                    public void onInfoWindowClick(Marker marker) {
+                                        String uriTemp = "http://maps.google.com/?daddr=" + currPoint.latitude + "," + currPoint.longitude;
+                                        Uri uri = Uri.parse(uriTemp);
+                                        showMap(uri);
+                                    }
+                                });
+
                             }
                         } catch (JSONException e1) {
                             e1.printStackTrace();
@@ -136,15 +153,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d("Non","Funziona");
             }
         });
-// Add the request to the RequestQueue.
+    // Add the request to the RequestQueue.
         queue.add(stringRequest);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(e.getLatitude(), e.getLongitude()), mapZoom));
-        //mMap.animateCamera(CameraUpdateFactory.zoomIn());
+
         if(firstTime) {
             mapZoom += 5;
             mMap.animateCamera(CameraUpdateFactory.zoomIn());
             mMap.animateCamera(CameraUpdateFactory.zoomTo(mapZoom), 3000, null);
             firstTime = false;
+        }
+    }
+
+
+    public void showMap(Uri geoLocation) {
+        Intent i = new Intent(Intent.ACTION_VIEW, geoLocation);
+        //i.setData(geoLocation);
+        i.setPackage("com.google.android.apps.maps");
+        if (i.resolveActivity(getPackageManager()) != null) {
+            startActivity(i);
         }
     }
 
@@ -162,4 +189,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onProviderDisabled(String provider) {
 
     }
+
+    /*@Override
+    public void onInfoWindowClick(Marker marker) {
+        Toast.makeText(this, "Voidì, tanta robba",
+                Toast.LENGTH_SHORT).show();
+    }*/
+
+
 }
