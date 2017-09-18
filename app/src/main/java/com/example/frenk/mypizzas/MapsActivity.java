@@ -20,7 +20,6 @@ import com.android.volley.toolbox.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnCameraMoveListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -35,7 +34,7 @@ import org.json.JSONObject;
 import java.io.Console;
 
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, OnCameraMoveListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
     protected LocationManager locationManager;
     private GoogleMap mMap;
@@ -102,7 +101,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .title("La tua posizione")
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.down_finger)));
             myPos.showInfoWindow();
+        } else {
+            myPos.hideInfoWindow();
+            myPos.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
         }
+
         findPizzerias(location);
 
         mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
@@ -192,20 +195,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onProviderDisabled(String provider) {
 
     }
-
-
-
-    @Override
-    public void onCameraMove() {
-        //sposta il marker mypos in base al movimento della telecamera (che si muove in base al cambio di posizione GPS)
-        myPos.setPosition(mMap.getCameraPosition().target);
-    }
-
-    /*@Override
-    public void onInfoWindowClick(Marker marker) {
-        Toast.makeText(this, "Cliccato",
-                Toast.LENGTH_SHORT).show();
-    }*/
-
-
 }
