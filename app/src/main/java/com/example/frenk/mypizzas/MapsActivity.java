@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.net.Uri;
 import android.os.Debug;
 import android.support.v4.app.ActivityCompat;
@@ -21,6 +20,7 @@ import com.android.volley.toolbox.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraMoveListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -35,13 +35,13 @@ import org.json.JSONObject;
 import java.io.Console;
 
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, OnCameraMoveListener {
 
     protected LocationManager locationManager;
-    //protected LocationListener myPosition;
     private GoogleMap mMap;
     boolean firstTime = true;
     float mapZoom = 10;
+    Marker myPos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +80,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        //mMap.setOnInfoWindowClickListener(this);
     }
 
 
@@ -97,19 +96,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             return;
         }
-        Marker myPos = mMap.addMarker(new MarkerOptions()
-            .position(new LatLng(location.getLatitude(), location.getLongitude()))
-            .title("La tua posizione")
-            .icon(BitmapDescriptorFactory.fromResource(R.drawable.down_finger)));
-        myPos.showInfoWindow();
+        if(firstTime) {
+            myPos = mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                    .title("La tua posizione")
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.down_finger)));
+            myPos.showInfoWindow();
+        }
         findPizzerias(location);
+
+        mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                if(!(marker.getTitle().equals("La tua posizione"))) {
+                                //per scegliere il mezzo di trasporto (apre maps con il percorso impostato):
+                    //String uriTemp = "http://maps.google.com/?daddr=" + marker.getPosition().latitude + "," + marker.getPosition().longitude;
+                                //per aprire direttamente il navigatore:
+                    String uriTemp = "google.navigation:q=" + marker.getPosition().latitude + "," + marker.getPosition().longitude;
+                    Uri uri = Uri.parse(uriTemp);
+                    openGMaps(uri);
+                }
+            }
+        });
     }
 
     void findPizzerias(final Location e){
         RequestQueue queue = Volley.newRequestQueue(this);
         String url ="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+ e.getLatitude() +","+e.getLongitude()+"&radius=500&type=restaurant&keyword=pizza&key=AIzaSyAf_F1XcHp_zJYCR_jDHYnGhEi0ATQiCpI\n";
 
-// Request a string response from the provided URL.
+        // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -129,19 +144,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 mMap.addMarker(new MarkerOptions()
                                         .position(currPoint)
                                         .title(jsO.getString("name"))
-                                        .snippet("Get Directions")
+                                        .snippet("Clicca QUI per ottenere indicazioni")
                                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.pizza)));
-
-
-                                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                                    @Override
-                                    public void onInfoWindowClick(Marker marker) {
-                                        String uriTemp = "http://maps.google.com/?daddr=" + currPoint.latitude + "," + currPoint.longitude;
-                                        Uri uri = Uri.parse(uriTemp);
-                                        showMap(uri);
-                                    }
-                                });
-
                             }
                         } catch (JSONException e1) {
                             e1.printStackTrace();
@@ -166,9 +170,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    public void showMap(Uri geoLocation) {
-        Intent i = new Intent(Intent.ACTION_VIEW, geoLocation);
-        //i.setData(geoLocation);
+    public void openGMaps(Uri whereIsMyPizza) {
+        Intent i = new Intent(Intent.ACTION_VIEW, whereIsMyPizza);
         i.setPackage("com.google.android.apps.maps");
         if (i.resolveActivity(getPackageManager()) != null) {
             startActivity(i);
@@ -190,9 +193,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+
+
+    @Override
+    public void onCameraMove() {
+        //sposta il marker mypos in base al movimento della telecamera (che si muove in base al cambio di posizione GPS)
+        myPos.setPosition(mMap.getCameraPosition().target);
+    }
+
     /*@Override
     public void onInfoWindowClick(Marker marker) {
-        Toast.makeText(this, "Voidì, tanta robba",
+        Toast.makeText(this, "Cliccato",
                 Toast.LENGTH_SHORT).show();
     }*/
 
