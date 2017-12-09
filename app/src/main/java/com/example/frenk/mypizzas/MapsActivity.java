@@ -8,12 +8,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.os.Debug;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
@@ -31,7 +29,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Console;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
@@ -142,7 +139,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 JSONObject location = geometry.getJSONObject("location");
                                 Double lat = location.getDouble("lat");
                                 Double lng = location.getDouble("lng");
-                                //Log.d(jsO.getString("name"),String.valueOf(lat));
                                 final LatLng currPoint = new LatLng(lat, lng);
                                 mMap.addMarker(new MarkerOptions()
                                         .position(currPoint)
