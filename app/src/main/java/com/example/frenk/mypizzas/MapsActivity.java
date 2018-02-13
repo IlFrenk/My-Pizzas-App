@@ -211,7 +211,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.options:
-                //newGame();
+                //something to do, like showing a fragment
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
