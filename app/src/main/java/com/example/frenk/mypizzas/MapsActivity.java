@@ -210,11 +210,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.radius:
+            case R.id.options:
                 //newGame();
-                return true;
-            case R.id.transport:
-                //showHelp();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
