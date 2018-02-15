@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
+import android.widget.Toast;
 
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
@@ -186,7 +187,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
+        Context context = getApplicationContext();
+        CharSequence text = provider + " sembra avere qualche difficoltà";
+        int duration = Toast.LENGTH_LONG;
 
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
     @Override
@@ -196,7 +202,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onProviderDisabled(String provider) {
+        Context context = getApplicationContext();
+        CharSequence text = "Attiva il GPS!";
+        int duration = Toast.LENGTH_LONG;
 
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
     @Override
