@@ -84,6 +84,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        Context context = getApplicationContext();
+        CharSequence text = "Ricerca pizzerie in corso...";
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
 
@@ -197,7 +203,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onProviderEnabled(String provider) {
+        Context context = getApplicationContext();
+        CharSequence text = "Ricerca GPS in corso...";
+        int duration = Toast.LENGTH_SHORT;
 
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
     @Override
